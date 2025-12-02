@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>StudyHub • Login / Register</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+  body {
+    background: #f5f7fb;
+    margin: 0;
+    font-family: system-ui;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .box {
+    width: 340px;
+    background: #fff;
+    padding: 28px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.12);
+  }
+
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    background: orange;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 8px;
+  }
+
+  p { text-align: center; margin-top: 10px; }
+  p span { cursor: pointer; color: #1a2a3a; font-weight: bold; }
+
+  .hidden { display: none; }
+  .error { color: red; text-align: center; margin-top: 10px; display: none; }
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+  <!-- REGISTER FORM -->
+  <div id="registerPage">
+    <h2>Create Account</h2>
+
+    <input id="regUser" type="text" placeholder="Username">
+    <input id="regPass" type="password" placeholder="Password">
+
+    <button onclick="registerUser()">Create Account</button>
+
+    <div id="regError" class="error">Username already exists</div>
+
+    <p>Already have an account? <span onclick="showLogin()">Login</span></p>
+  </div>
+
+  <!-- LOGIN FORM -->
+  <div id="loginPage" class="hidden">
+    <h2>Login</h2>
+
+    <input id="loginUser" type="text" placeholder="Username">
+    <input id="loginPass" type="password" placeholder="Password">
+
+    <button onclick="loginUser()">Login</button>
+
+    <div id="loginError" class="error">Invalid username or password</div>
+
+    <p>New user? <span onclick="showRegister()">Create Account</span></p>
+  </div>
+
+</div>
+
+<!-- SWITCH FORM -->
+<script>
+function showLogin() {
+  document.getElementById("registerPage").classList.add("hidden");
+  document.getElementById("loginPage").classList.remove("hidden");
+}
+
+function showRegister() {
+  document.getElementById("loginPage").classList.add("hidden");
+  document.getElementById("registerPage").classList.remove("hidden");
+}
+</script>
+
+<!-- SUPABASE CLIENT -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseUrl = "https://zpvofuokxzyhnqlvuiec.supabase.co";  
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpwdm9mdW9reHp5aG5xbHZ1aWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwNjI3NTQsImV4cCI6MjA3OTYzODc1NH0.RAoH5-mxagkmjHPkMn09K4YoN1yXJpfgiwwHbtFjSzI";  
+const db = supabase.createClient(supabaseUrl, supabaseKey);
+
+// REGISTER USER
+async function registerUser() {
+  const username = document.getElementById("regUser").value.trim();
+  const password = document.getElementById("regPass").value;
+
+  if (!username || !password) {
+    alert("Fill all fields");
+    return;
+  }
+
+  // Check if username exists
+  const { data: exists } = await db
+    .from("users")
+    .select("*")
+    .eq("username", username)
+    .maybeSingle();
+
+  if (exists) {
+    document.getElementById("regError").style.display = "block";
+    return;
+  }
+
+  // Insert new user
+  await db.from("users").insert([{ username, password }]);
+
+  alert("Account created! Please login.");
+  showLogin();
+}
+
+// LOGIN USER
+// LOGIN USER
+async function loginUser() {
+  const username = document.getElementById("loginUser").value.trim();
+  const password = document.getElementById("loginPass").value;
+
+  const { data, error } = await db
+    .from("users")
+    .select("*")
+    .eq("username", username)
+    .single();
+
+  if (!data || error || data.password !== password) {
+    document.getElementById("loginError").style.display = "block";
+    return;
+  }
+
+  // save login user to localStorage
+  localStorage.setItem("loggedUser", username);
+
+  // redirect
+  window.location.href = "index.html";
+}
+
+  const user = localStorage.getItem("loggedUser");
+  if (user) {
+    document.getElementById("profileName").textContent = user;
+  }
+
+</script>
+
+</body>
+</html>
