@@ -9,7 +9,7 @@ body {
   position: fixed;
   bottom: 90px;
   right: 20px;
-  width: 300px;
+  width: 340px;
   height: 450px;
   background: #fff;
   border-radius: 15px;
@@ -190,3 +190,4 @@ body {
   0%, 60%, 100% { transform: initial; }
   30% { transform: translateY(-6px); }
 }
+
